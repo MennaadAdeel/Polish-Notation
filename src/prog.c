@@ -14,88 +14,66 @@
 #include "config.h"
 #include "private.h"
 
-PolishError_t GeneratePostifix(u8_t** Postifix, u8_t* Infix){
+PolishError_t GeneratePostifix(string_t* Postifix, string_t Infix){
     Stack_t st;
     StackEntry e;
     CreateStack(&st);
-    u32_t Iterator = 0;
-    *Postifix = (u8_t*) malloc(1 * sizeof(u8_t));
+    u32_t Iterator = 0, Jterator = 0;
+    *Postifix = (u8_t*) calloc(100, sizeof(u8_t));    
     // A + B * C $ D / E - F
     // ABCD$*/E+F-
     while (*(Infix + Iterator) != '\0'){
         while(Is_Digit(*(Infix + Iterator)) == IS_NUMBER)
-            Concatinate(*(Infix + Iterator++), Postifix);
-        Concatinate(' ', Postifix);
+            Concatinate(*(Infix + Iterator++), Postifix , Jterator++);
+        Concatinate(' ', Postifix , Jterator++);
         e.type = IS_OPERATOR;
         e.value.operators = *(Infix + Iterator);
-        if(StackEmpty(st) == STACK_EMPTY){
-            Push(e, &st); 
-        }
-        else if(StackEmpty != STACK_EMPTY){
-            StackEntry top;
+        StackEntry top;
+        StackTop(&top, &st);
+        while(!precedent(e.value.operators, top.value.operators) && StackEmpty(st) != STACK_EMPTY){
+            Pop(&top, &st);
+            Concatinate((u8_t)top.value.operators, Postifix , Jterator++);                
+            Concatinate(' ', Postifix , Jterator++);
             StackTop(&top, &st);
-            if(!precedent(e.value.operators, top.value.operators)){
-                Pop(&top, &st);
-                Concatinate((u8_t)top.value.operators, Postifix);
-                Concatinate(' ', Postifix);
-            }            
-            Push(e, &st);
-        }
+        }            
+        Push(e, &st);
+        
         Iterator++;
     }
+    *(*Postifix + (Jterator - 1)) = '\0';
     ClearStack(&st);
     return EXPRESSION_DONE;
 }
 
-// PolishError_t GenerateInfix(u8_t** Infix, u8_t* Postifix){
-//     Stack_t st;
-//     StackEntry e, op1, op2;
-//     u8_t* StrNum;
-//     CreateStack(&st);
-//     u32_t Iterator = 0;
-//     // A + B * C $ D / E - F
-//     // ABCD$*E/+F-
-//     while(*(Postifix + Iterator) != '\0'){
-//         StrNum = (u8_t*) malloc(1 * sizeof(u8_t));
-//         while(Is_Digit(*(Postifix + Iterator)) == IS_NUMBER){
-//             while(Is_Digit(*(Postifix + Iterator)) == IS_NUMBER){
-//                 Concatinate(*(Postifix + Iterator++), StrNum);
-//             }
-//             e.type = IS_NUMBER;
-//             e.value.operand = Sto_int(StrNum);
-//             Push(e, &st);
-//             free(StrNum);
-//             Iterator++;
-//         }
-        
-//     }
-// }
-
-PolishError_t EvaluatePostifix(f64_t* Result, u8_t* Postifix){
+PolishError_t EvaluatePostifix(f64_t* Result, string_t Postifix){
     Stack_t st;
     StackEntry e, op1, op2;
-    u8_t* StrNum;
     CreateStack(&st);
-    u32_t Iterator = 0;
+    u32_t Iterator = 0, Jterator = 0;
     // A + B * C $ D / E - F
     // ABCD$*E/+F-
     while(*(Postifix + Iterator) != '\0'){
-        StrNum = (u8_t*) malloc(1 * sizeof(u8_t));
         while(Is_Digit(*(Postifix + Iterator)) == IS_NUMBER){
+            string_t StrNum = (string_t) calloc(10, sizeof(u8_t));
+            Jterator = 0;
             while(Is_Digit(*(Postifix + Iterator)) == IS_NUMBER){
-                Concatinate(*(Postifix + Iterator++), StrNum);
+                Concatinate(*(Postifix + Iterator++), &StrNum, Jterator++);
             }
+            realloc(StrNum, (strlen(StrNum) + 1) * sizeof(u8_t));
             e.type = IS_NUMBER;
-            e.value.operand = Sto_int(StrNum);
+            e.value.operand = (f64_t)Sto_int(StrNum);
             Push(e, &st);
             free(StrNum);
             Iterator++;
         }
-        Pop(&op1, &st);    
-        Pop(&op2, &st);
-        *Result = Calc(op1.value.operand, op2.value.operand, *(Postifix + Iterator++));
-        e.value.operand = *Result;
-        Push(e, &st);
+        if(StackEmpty(st) != STACK_EMPTY && *(Postifix + Iterator) != ' '){
+            Pop(&op2, &st);
+            Pop(&op1, &st);
+            *Result = Calc(op1.value.operand, op2.value.operand, *(Postifix + Iterator));
+            e.value.operand = *Result;
+            Push(e, &st);
+        }        
+        Iterator++;
     }
     ClearStack(&st);
     return EXPRESSION_DONE;
@@ -103,12 +81,12 @@ PolishError_t EvaluatePostifix(f64_t* Result, u8_t* Postifix){
 
 static u32_t precedent(u8_t op1, u8_t op2){
     if(op1 == '$')
-        return 1;
-    else if(op1 == '/' || op1 == '*'){
         return op2 != '$';
+    else if(op1 == '/' || op1 == '*'){
+        return op2 != '$' && op2 != '*' && op2 != '/';
     }
     else
-        return op2 != '$' && op2 != '*' && op2 != '/';
+        return op2 != '$' && op2 != '*' && op2 != '/' && op2 != '+' && op2 != '-';
 }
 
 static u8_t Is_Digit(u8_t c){
@@ -118,7 +96,7 @@ static u8_t Is_Digit(u8_t c){
     return IS_OPERATOR;
 }
 
-static f64_t Calc(s128_t op1, s128_t op2, u8_t operator){
+static f64_t Calc(f64_t op1, f64_t op2, u8_t operator){
     switch(operator){
         case '+':
             return (f64_t)sum(op1, op2);

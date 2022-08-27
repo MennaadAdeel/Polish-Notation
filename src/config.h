@@ -7,7 +7,7 @@
 typedef struct{
     u8_t type;
     union data{
-        s128_t operand;
+        f64_t operand;
         u8_t operators;
     }value;
 }Element_t;

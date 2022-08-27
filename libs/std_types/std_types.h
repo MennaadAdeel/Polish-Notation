@@ -1,6 +1,8 @@
 #ifndef _STD_TYPES_
 #define _STD_TYPES_
 
+typedef char*                   string_t;
+
 typedef unsigned char           u8_t;
 typedef unsigned short int      u16_t;
 typedef unsigned int            u32_t;

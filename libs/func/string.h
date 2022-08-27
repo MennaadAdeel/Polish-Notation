@@ -2,10 +2,10 @@
 #define _STRING_STD_
 #include "../std_types/std_types.h"
 
-void GetString(u8_t**);
+void GetString(string_t*);
 
-void Concatinate(u8_t, u8_t**);
+void Concatinate(u8_t, string_t*, u32_t pos);
 
-u128_t Sto_int(u8_t*);
+u128_t Sto_int(string_t);
 
 #endif

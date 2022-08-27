@@ -3,26 +3,26 @@
 #include "..\std_types\std_types.h"
 
 
-u32_t squareRoot(u128_t num){
-    return sqrt((double) num);
+f64_t squareRoot(f64_t num){
+    return sqrt((f64_t) num);
 }
 
-s128_t Power(s128_t num, s128_t power){
-    return pow((double) num, (double) power);
+f64_t Power(f64_t num, f64_t power){
+    return pow((f64_t) num, (f64_t) power);
 }
 
-s128_t sum(s128_t num1, s128_t num2){
+f64_t sum(f64_t num1, f64_t num2){
     return num1 + num2;
 }
 
-s128_t subtract(s128_t num1, s128_t num2){
+f64_t subtract(f64_t num1, f64_t num2){
     return num1 - num2;
 }
 
-s128_t multiply(s128_t num1, s128_t num2){
+f64_t multiply(f64_t num1, f64_t num2){
     return num1 * num2;
 }
 
-f64_t divide(s128_t num1, s128_t num2){
-    return num1/(float) num2;
+f64_t divide(f64_t num1, f64_t num2){
+    return num1/(f64_t) num2;
 }

@@ -5,29 +5,23 @@
 #include "../std_types/std_types.h"
 
 
-void GetString(u8_t** str){
-    *str = (u8_t*) malloc(100 * sizeof(**str));
+void GetString(string_t* str){
+    *str = (string_t) malloc(100 * sizeof(**str));
     scanf("%s", *str);
     *str = realloc(*str, strlen(*str) * sizeof(**str));
 }
 
-void Concatinate(u8_t c, u8_t** str){
-    if(strlen(str) > 1){
-        *str = realloc(*str, (strlen(*str) + 1) * sizeof(u8_t));
-        *(*str + (strlen(*str) - 1)) = c;
-    }
-    else{
-        *(*str + (strlen(*str) - 1)) = c;
-    }
+void Concatinate(u8_t c, string_t* str, u32_t pos){
+    *(*str + pos) = c;
 }
 
-u128_t Sto_int(u8_t* str){
-    u128_t num = 0, i = 0;
-    while (*(str + i) != '\0')
+u128_t Sto_int(string_t str){
+    u128_t num = 0;
+    s16_t i = strlen(str) - 1, pw = 0;
+    while (i >= 0)
     {
-        num += ((*(str + i) - '0') * pow(10, strlen(str) - 1));
-        i++;
-    }
-    
+        num += ((*(str + i) - '0') * pow(10, pw));
+        i--, pw++;
+    }    
     return num;
 }
