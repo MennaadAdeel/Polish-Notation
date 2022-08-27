@@ -90,7 +90,7 @@ static u32_t precedent(u8_t op1, u8_t op2){
 }
 
 static u8_t Is_Digit(u8_t c){
-    if(c >= '0' && c <= '9')
+    if(IS_CAPITAL_LATER || IS_SMALL_LATER || IS_DIGIT)
         return IS_NUMBER;
     
     return IS_OPERATOR;
